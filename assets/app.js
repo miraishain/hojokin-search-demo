@@ -4,6 +4,7 @@
 
   var PAGE_SIZE = 20;
   var all = [];        // 全件
+  var byId = {};       // id -> item
   var filtered = [];   // 絞り込み後
   var shown = 0;       // 表示済み件数
 
@@ -19,6 +20,8 @@
     moreBtn: document.getElementById('moreBtn'),
     year: document.getElementById('year'),
     footNote: document.getElementById('footNote'),
+    modal: document.getElementById('modal'),
+    modalBody: document.getElementById('modalBody'),
   };
 
   el.year.textContent = new Date().getFullYear();
@@ -59,7 +62,6 @@
         if (hay.indexOf(kw) === -1) return false;
       }
       if (area) {
-        // 指定地域 もしくは 全国 を含むものにヒット
         if (it.targetAreas.indexOf(area) === -1 && it.targetAreas.indexOf('全国') === -1) return false;
       }
       if (purpose) {
@@ -72,7 +74,6 @@
       if (sort === 'amount') {
         return (b.maxAmount || -1) - (a.maxAmount || -1);
       }
-      // 締切が近い順（締切なしは後ろ）
       var ta = a.acceptanceEnd ? new Date(a.acceptanceEnd).getTime() : Infinity;
       var tb = b.acceptanceEnd ? new Date(b.acceptanceEnd).getTime() : Infinity;
       return ta - tb;
@@ -87,8 +88,7 @@
 
   function renderMore() {
     var next = filtered.slice(shown, shown + PAGE_SIZE);
-    var html = next.map(cardHtml).join('');
-    el.list.insertAdjacentHTML('beforeend', html);
+    el.list.insertAdjacentHTML('beforeend', next.map(cardHtml).join(''));
     shown += next.length;
     el.moreBtn.hidden = shown >= filtered.length;
   }
@@ -96,30 +96,65 @@
   function cardHtml(it) {
     var amount = formatAmount(it.maxAmount);
     var end = formatDate(it.acceptanceEnd);
-    var areas = it.targetAreas.slice(0, 3).map(function (a) { return esc(a); }).join('・');
-    var tags = it.usePurposes.slice(0, 4).map(function (p) {
-      return '<li>#' + esc(p) + '</li>';
-    }).join('');
+    var areas = it.targetAreas.slice(0, 3).map(esc).join('・');
+    var tags = it.usePurposes.slice(0, 4).map(function (p) { return '<li>#' + esc(p) + '</li>'; }).join('');
 
     return '' +
-      '<li class="card">' +
+      '<li class="card" data-id="' + esc(it.id) + '" tabindex="0" role="button" aria-label="詳細を見る">' +
         '<span class="card-badge">公募中</span>' +
         '<h3 class="card-title">' + esc(it.title) + '</h3>' +
         '<div class="card-sub">' +
           (areas ? '<span>📍 ' + areas + '</span>' : '') +
           (end ? '<span>🗓 締切 ' + esc(end) + '</span>' : '') +
         '</div>' +
-        (amount ?
-          '<div class="card-amount"><span class="lbl">上限金額</span><span class="val">' + esc(amount) + '</span></div>' : '') +
+        (amount ? '<div class="card-amount"><span class="lbl">上限金額</span><span class="val">' + esc(amount) + '</span></div>' : '') +
         (it.summary ? '<p class="card-summary">' + esc(it.summary) + '</p>' : '') +
         (tags ? '<ul class="card-tags">' + tags + '</ul>' : '') +
-        (it.sourceUrl ?
-          '<a class="card-link" href="' + esc(it.sourceUrl) + '" target="_blank" rel="noopener">公式の詳細を見る ↗</a>' :
-          '<span class="card-link" style="color:#94a3b8">公式リンクなし</span>') +
+        '<span class="card-link card-more">詳細を見る →</span>' +
       '</li>';
   }
 
-  // ---- セレクトの選択肢を生成 ----
+  // ---- 詳細モーダル ----
+  function openModal(id) {
+    var it = byId[id];
+    if (!it) return;
+    var amount = formatAmount(it.maxAmount);
+    var end = formatDate(it.acceptanceEnd);
+    var rows = [];
+    if (it.targetAreas.length) rows.push(['対象地域', it.targetAreas.map(esc).join('、')]);
+    if (end) rows.push(['募集締切', esc(end)]);
+    if (amount) rows.push(['補助上限額', esc(amount)]);
+    if (it.subsidyRate) rows.push(['補助率', esc(it.subsidyRate)]);
+    if (it.organization) rows.push(['実施機関', esc(it.organization)]);
+
+    var rowsHtml = rows.map(function (r) {
+      return '<div class="m-row"><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
+    }).join('');
+    var tags = it.usePurposes.map(function (p) { return '<li>#' + esc(p) + '</li>'; }).join('');
+
+    el.modalBody.innerHTML = '' +
+      '<span class="card-badge">公募中</span>' +
+      '<h2 class="m-title">' + esc(it.title) + '</h2>' +
+      (rowsHtml ? '<dl class="m-rows">' + rowsHtml + '</dl>' : '') +
+      (it.summary ? '<p class="m-summary">' + esc(it.summary) + '</p>' : '') +
+      (tags ? '<ul class="card-tags">' + tags + '</ul>' : '') +
+      '<div class="m-actions">' +
+        (it.sourceUrl
+          ? '<a class="m-official" href="' + esc(it.sourceUrl) + '" target="_blank" rel="noopener">公式サイトで詳細・申請方法を確認 ↗</a>' +
+            '<p class="m-note">※ 公式ページは募集終了などで表示されない場合があります。</p>'
+          : '<p class="m-note">この補助金の公式詳細URLは登録されていません。</p>') +
+      '</div>';
+
+    el.modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    el.modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  // ---- セレクトの選択肢 ----
   function buildOptions() {
     var areas = {}, purposes = {};
     all.forEach(function (it) {
@@ -144,6 +179,7 @@
       all = (data.items || []).map(function (it) {
         it.targetAreas = it.targetAreas || [];
         it.usePurposes = it.usePurposes || [];
+        byId[it.id] = it;
         return it;
       });
       buildOptions();
@@ -168,4 +204,23 @@
   el.purpose.addEventListener('change', applyFilters);
   el.sort.addEventListener('change', applyFilters);
   el.moreBtn.addEventListener('click', renderMore);
+
+  // カードクリック → モーダル（イベント委譲）
+  el.list.addEventListener('click', function (e) {
+    var li = e.target.closest('.card');
+    if (li) openModal(li.getAttribute('data-id'));
+  });
+  el.list.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var li = e.target.closest('.card');
+    if (li) { e.preventDefault(); openModal(li.getAttribute('data-id')); }
+  });
+
+  // モーダルを閉じる
+  el.modal.addEventListener('click', function (e) {
+    if (e.target === el.modal || e.target.hasAttribute('data-close')) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !el.modal.hidden) closeModal();
+  });
 })();

@@ -96,6 +96,46 @@ a { color: inherit; }
 .card-link { margin-top: auto; font-weight: 700; font-size: .85rem; color: var(--hj); text-decoration: none; }
 .card-link:hover { text-decoration: underline; }
 
+.card { cursor: pointer; }
+.card:focus-visible { outline: 2px solid var(--hj); outline-offset: 2px; }
+.card-more { margin-top: auto; font-weight: 700; font-size: .85rem; color: var(--hj); }
+
+/* 詳細モーダル */
+.modal {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(15, 23, 42, .55);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 5vh 16px; overflow-y: auto;
+}
+.modal[hidden] { display: none; }
+.modal-card {
+  position: relative; width: min(680px, 100%);
+  background: #fff; border-radius: 16px; padding: 28px clamp(20px, 4vw, 36px);
+  box-shadow: 0 30px 70px -20px rgba(15, 23, 42, .5);
+}
+.modal-close {
+  position: absolute; top: 12px; right: 14px; width: 36px; height: 36px;
+  border: 0; border-radius: 50%; background: var(--bg-soft); color: var(--ink-soft);
+  font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.modal-close:hover { background: #e7ebf0; }
+.m-title { font-size: 1.35rem; font-weight: 800; line-height: 1.45; margin: .4rem 0 1rem; }
+.m-rows { display: grid; gap: 0; margin-bottom: 1.1rem; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.m-row { display: grid; grid-template-columns: 120px 1fr; }
+.m-row + .m-row { border-top: 1px solid var(--line); }
+.m-row dt { background: var(--bg-soft); padding: .6rem .9rem; font-size: .85rem; font-weight: 700; color: var(--ink-soft); }
+.m-row dd { padding: .6rem .9rem; font-size: .9rem; }
+.m-summary { font-size: .92rem; color: #4a5663; margin-bottom: 1rem; white-space: pre-wrap; }
+.m-actions { margin-top: 1.2rem; }
+.m-official {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: var(--hj); color: #fff; text-decoration: none; font-weight: 700;
+  padding: .7rem 1.3rem; border-radius: 10px;
+}
+.m-official:hover { filter: brightness(1.07); }
+.m-note { font-size: .78rem; color: var(--ink-soft); margin-top: .6rem; }
+@media (max-width: 480px) { .m-row { grid-template-columns: 92px 1fr; } }
+
 .empty { text-align: center; color: var(--ink-soft); padding: 40px 0; }
 .more-wrap { text-align: center; margin-top: 26px; }
 .more-btn { padding: 11px 30px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-weight: 700; font-size: .92rem; cursor: pointer; }
