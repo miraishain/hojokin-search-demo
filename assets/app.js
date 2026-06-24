@@ -20,8 +20,6 @@
     moreBtn: document.getElementById('moreBtn'),
     year: document.getElementById('year'),
     footNote: document.getElementById('footNote'),
-    modal: document.getElementById('modal'),
-    modalBody: document.getElementById('modalBody'),
   };
 
   el.year.textContent = new Date().getFullYear();
@@ -100,7 +98,7 @@
     var tags = it.usePurposes.slice(0, 4).map(function (p) { return '<li>#' + esc(p) + '</li>'; }).join('');
 
     return '' +
-      '<li class="card" data-id="' + esc(it.id) + '" tabindex="0" role="button" aria-label="詳細を見る">' +
+      '<li><a class="card" href="detail.html?id=' + encodeURIComponent(it.id) + '" aria-label="詳細を見る">' +
         '<span class="card-badge">公募中</span>' +
         '<h3 class="card-title">' + esc(it.title) + '</h3>' +
         '<div class="card-sub">' +
@@ -111,47 +109,7 @@
         (it.summary ? '<p class="card-summary">' + esc(it.summary) + '</p>' : '') +
         (tags ? '<ul class="card-tags">' + tags + '</ul>' : '') +
         '<span class="card-link card-more">詳細を見る →</span>' +
-      '</li>';
-  }
-
-  // ---- 詳細モーダル ----
-  function openModal(id) {
-    var it = byId[id];
-    if (!it) return;
-    var amount = formatAmount(it.maxAmount);
-    var end = formatDate(it.acceptanceEnd);
-    var rows = [];
-    if (it.targetAreas.length) rows.push(['対象地域', it.targetAreas.map(esc).join('、')]);
-    if (end) rows.push(['募集締切', esc(end)]);
-    if (amount) rows.push(['補助上限額', esc(amount)]);
-    if (it.subsidyRate) rows.push(['補助率', esc(it.subsidyRate)]);
-    if (it.organization) rows.push(['実施機関', esc(it.organization)]);
-
-    var rowsHtml = rows.map(function (r) {
-      return '<div class="m-row"><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
-    }).join('');
-    var tags = it.usePurposes.map(function (p) { return '<li>#' + esc(p) + '</li>'; }).join('');
-
-    el.modalBody.innerHTML = '' +
-      '<span class="card-badge">公募中</span>' +
-      '<h2 class="m-title">' + esc(it.title) + '</h2>' +
-      (rowsHtml ? '<dl class="m-rows">' + rowsHtml + '</dl>' : '') +
-      (it.summary ? '<p class="m-summary">' + esc(it.summary) + '</p>' : '') +
-      (tags ? '<ul class="card-tags">' + tags + '</ul>' : '') +
-      '<div class="m-actions">' +
-        (it.sourceUrl
-          ? '<a class="m-official" href="' + esc(it.sourceUrl) + '" target="_blank" rel="noopener">公式サイトで詳細・申請方法を確認 ↗</a>' +
-            '<p class="m-note">※ 公式ページは募集終了などで表示されない場合があります。</p>'
-          : '<p class="m-note">この補助金の公式詳細URLは登録されていません。</p>') +
-      '</div>';
-
-    el.modal.hidden = false;
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    el.modal.hidden = true;
-    document.body.style.overflow = '';
+      '</a></li>';
   }
 
   // ---- セレクトの選択肢 ----
@@ -205,22 +163,4 @@
   el.sort.addEventListener('change', applyFilters);
   el.moreBtn.addEventListener('click', renderMore);
 
-  // カードクリック → モーダル（イベント委譲）
-  el.list.addEventListener('click', function (e) {
-    var li = e.target.closest('.card');
-    if (li) openModal(li.getAttribute('data-id'));
-  });
-  el.list.addEventListener('keydown', function (e) {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    var li = e.target.closest('.card');
-    if (li) { e.preventDefault(); openModal(li.getAttribute('data-id')); }
-  });
-
-  // モーダルを閉じる
-  el.modal.addEventListener('click', function (e) {
-    if (e.target === el.modal || e.target.hasAttribute('data-close')) closeModal();
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !el.modal.hidden) closeModal();
-  });
 })();

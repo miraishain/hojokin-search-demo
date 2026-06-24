@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>補助金・助成金検索 デモ｜ミライシャイン</title>
-  <meta name="description" content="ミライシャインの補助金検索サービスのデモ。地域・用途・キーワードから補助金・助成金を検索できます（公開オープンデータのスナップショット）。" />
-  <!-- デモ環境のため検索エンジンには載せない -->
+  <meta name="description" content="ミライシャインの補助金検索サービスのデモ。地域・用途・キーワードから補助金・助成金を検索できます。" />
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,27 +12,31 @@
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
-  <!-- Header -->
   <header class="site-header">
-    <div class="container header-inner">
-      <a href="./" class="logo">
+    <div class="header-shell">
+      <a href="./" class="logo" aria-label="ミライシャイン ホーム">
         <span class="logo-mark">M</span>
         <span class="logo-text">ミライシャイン</span>
       </a>
-      <span class="header-tag">補助金検索サービス デモ</span>
+      <nav class="site-nav" aria-label="グローバルナビゲーション">
+        <a href="#service">サービス</a>
+        <a href="#data">受注データ連携</a>
+        <a href="#search">補助金検索</a>
+        <a href="#flow">導入の流れ</a>
+        <a href="#contact" class="contact-link">お問い合わせ</a>
+      </nav>
     </div>
   </header>
 
   <main>
-    <!-- Hero + 検索 -->
-    <section class="hero">
+    <section class="hero" id="search">
       <div class="container">
         <div class="hero-card">
           <div class="hero-inner">
             <h1 class="hero-title">補助金・助成金をさがす</h1>
-            <p class="hero-lead">地域・用途・キーワードから、いま公募中の補助金・助成金を検索できます。</p>
+            <p class="hero-lead">地域・用途から、いま使える補助金・助成金を検索できます。</p>
             <form class="search-form" id="searchForm" autocomplete="off">
-              <input type="text" id="kw" class="f-input" placeholder="キーワード（例：IT、設備、創業）" aria-label="キーワード" />
+              <input type="text" id="kw" class="f-input" placeholder="キーワード（例：ホームページ）" aria-label="キーワード" />
               <select id="area" class="f-select" aria-label="地域"><option value="">すべての地域</option></select>
               <select id="purpose" class="f-select" aria-label="用途"><option value="">すべての用途</option></select>
               <button type="submit" class="f-btn">検索</button>
@@ -43,11 +46,10 @@
       </div>
     </section>
 
-    <!-- 結果 -->
     <section class="results">
       <div class="container">
         <div class="result-bar">
-          <p class="result-count" id="resultCount">読み込み中…</p>
+          <p class="result-count" id="resultCount">読み込み中...</p>
           <label class="sort">
             <span>並び替え</span>
             <select id="sort" class="f-select">
@@ -65,27 +67,18 @@
     </section>
   </main>
 
-  <!-- Footer：出典・免責 -->
   <footer class="site-footer">
     <div class="container">
       <p class="foot-credit">
-        出典：<a href="https://www.jgrants-portal.go.jp/" target="_blank" rel="noopener">Jグランツ（デジタル庁）</a>
-        ／ <a href="https://mirasapo-plus.go.jp/" target="_blank" rel="noopener">ミラサポplus（中小企業庁）</a>
+        出典：<a href="https://www.jgrants-portal.go.jp/" target="_blank" rel="noopener">Jグランツ</a>
+        ・<a href="https://mirasapo-plus.go.jp/" target="_blank" rel="noopener">ミラサポplus</a>
       </p>
       <p class="foot-note" id="footNote">
-        ※本ページはデモです。掲載情報は取得時点のスナップショットであり、最新・正確な内容は各補助金の公式ページでご確認ください。
+        本ページはデモです。掲載情報は取得時点のスナップショットであり、最新・正確な内容は各補助金の公式ページでご確認ください。
       </p>
-      <p class="foot-copy">© <span id="year"></span> Miraishine</p>
+      <p class="foot-copy">&copy; <span id="year"></span> Miraishine</p>
     </div>
   </footer>
-
-  <!-- 詳細モーダル -->
-  <div class="modal" id="modal" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-label="補助金の詳細">
-      <button class="modal-close" type="button" data-close aria-label="閉じる">×</button>
-      <div class="modal-body" id="modalBody"></div>
-    </div>
-  </div>
 
   <script src="assets/app.js"></script>
 </body>
